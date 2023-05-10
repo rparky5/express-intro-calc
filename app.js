@@ -2,15 +2,36 @@
 
 const express = require("express");
 const app = express();
+const { findMean, findMedian, findMode } = require("./stats");
+const { convertStrNums } = require("./utils");
 
 // useful error class to throw
-const { NotFoundError } = require("./expressError");
+const { NotFoundError, BadRequestError } = require("./expressError");
 
 const MISSING = "Expected key `nums` with comma-separated list of numbers.";
 
+// process JSON body => req.body
+app.use(express.json());
 
 /** Finds mean of nums in qs: returns {operation: "mean", result } */
+app.get("/mean", function (req, res) {
+  let nums = req.query.nums.split(",");
 
+  try {
+    nums = convertStrNums(nums);
+  } catch (err) {
+    throw new BadRequestError(err.message);
+  }
+
+  const mean = findMean(nums);
+
+  res.json({
+    response: {
+      operation: "mean",
+      value: mean
+    }
+  });
+});
 
 /** Finds median of nums in qs: returns {operation: "median", result } */
 
